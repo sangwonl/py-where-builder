@@ -13,7 +13,6 @@ class Q(object):
         matches = re.findall(r':[_a-zA-Z\d]+', query_stmt)
         if kwargs:
             if not all([(':%s' % k) in matches for k in kwargs]):
-                print kwargs
                 raise ValueError
             query_stmt = self._format_with_kwargs(query_stmt, matches, **kwargs)
         elif args:
@@ -50,22 +49,29 @@ class WhereNode(tree.TreeNode):
         for q in args:
             if isinstance(q, WhereNode):
                 self.add(q)
-            elif isinstance(q, Q):
+            else:
                 self.add(WhereNode(q))
 
     def clause(self):
-        full_stmt = ''
         stack = []
+        ops = ('and', 'or')
         for n in self.walk():
-            if isinstance(n.value, Q):
-                stmt = n.value.clause()
-                stack.append(stmt)
-            elif n.value in ('and', 'or'):
-                op_right = stack.pop()
-                op_left = stack.pop()
-                stmt = '(%s) %s (%s)' % (op_left, n.value, op_right)
-                stack.append(stmt)
-        return stack.pop()
+            op = n.value
+            if op in ops:
+                operands = []
+                for s in reversed(stack):
+                    if n.parent == s.parent:
+                        break
+                    pop = stack.pop()
+                    operands.append(pop)
+
+                stmt = ' {} '.format(op).join(['({})'.format(o.value.clause()) for o in reversed(operands)])
+                combined = WhereNode(Q(stmt))
+                combined.parent = self
+                stack.append(combined)
+            else:
+                stack.append(n)
+        return stack.pop().value.clause()
 
 
 class AND(WhereNode):
@@ -81,28 +87,25 @@ class OR(WhereNode):
 def _conditional_clause(q):
     if q is None:
         return ''
-
-    if q and (isinstance(q, Q) or isinstance(q, WhereNode)):
-        return q.clause()
-
-    return q
+    return q.clause()
 
 
 class SWITCH(object):
     def __init__(self, switch, *args):
-        self.switch = switch
-        self.cases_map = {}
+        cases_map = {}
         for (case, q) in args:
-            self.cases_map[case] = q
+            cases_map[case] = q
+
+        q = cases_map[switch]
+        self.translated_stmt = _conditional_clause(q)
 
     def clause(self):
-        q = self.cases_map[self.switch]
-        return _conditional_clause(q)
+        return self.translated_stmt
+
 
 class IF(object):
     def __init__(self, condition, q):
-        self.condition = condition
-        self.q = q
+        self.translated_stmt = _conditional_clause(q) if condition else ''
 
     def clause(self):
-        return _conditional_clause(self.q) if self.condition else ''
+        return self.translated_stmt

@@ -9,6 +9,7 @@ class TreeNode(object):
         self.children.append(node)
 
     def walk(self):
+        # walk pre-order traversal
         for child in self.children:
             for n in child.walk():
                 yield n

@@ -56,3 +56,21 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
         var = 30
         where = qb.IF(var > 40, qb.Q('a.age > 30'))
         self.assertEquals(where.clause(), '')
+
+    def test_all_together(self):
+        where = qb.OR(
+            qb.Q('a.first_name = :first and a.last_name = :last', first='eddy', last='lee'),
+            qb.AND(qb.Q('a.age >= 34'), qb.Q('a.allowed_push = :allowed_push', allowed_push=1)),
+            qb.IF(True, qb.Q('a.age > 30')),
+            qb.IF(True, qb.SWITCH('inner_case1',
+                ('inner_case1', qb.Q('a.age >= 10')),
+                ('inner_case2', qb.Q('a.age >= 15')))
+            ),
+            qb.SWITCH('case2',
+                ('case1', qb.AND(qb.Q('a.age >= 34'), qb.Q('a.age < :age', age=50))),
+                ('case2', qb.AND(qb.Q('a.age >= 50'), qb.Q('a.age < :age', age=60)))
+            )
+        )
+        expected = "(a.first_name = 'eddy' and a.last_name = 'lee') or ((a.age >= 34) and (a.allowed_push = 1)) or " \
+            + "(a.age > 30) or (a.age >= 10) or ((a.age >= 50) and (a.age < 60))"
+        self.assertEquals(where.clause(), expected)
