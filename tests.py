@@ -3,8 +3,8 @@ try:
 except:
     import unittest
 
-from dumbsql import qb
-from dumbsql import tree
+from wherebuilder import tree
+from wherebuilder import qb
 
 
 class TreeTestCase(unittest.TestCase):
@@ -54,7 +54,7 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
             ('case1', qb.AND(qb.Q('a.age >= 34'), qb.Q('a.age < :age', age=50))),
             ('case2', qb.AND(qb.Q('a.age >= 50'), qb.Q('a.age < :age', age=60)))
         )
-        expected = "(a.age >= 34) and (a.age < 50)" 
+        expected = "(a.age >= 34) and (a.age < 50)"
         self.assertEquals(where.clause(), expected)
 
     def test_if_builder(self):

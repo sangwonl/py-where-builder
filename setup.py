@@ -11,18 +11,18 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='py-sql-where-builder',
+    name='py-where-builder',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.0.1',
 
-    description='Structured where clauses',
+    description='Structured sql where clause builder',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/sangwonl/py-sql-where-builder',
+    url='https://github.com/sangwonl/py-where-builder',
 
     # Author details
     author='Sangwon Lee',
@@ -54,7 +54,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='development sql builder query',
+    keywords='development sql builder where query',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
