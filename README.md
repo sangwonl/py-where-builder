@@ -2,7 +2,7 @@
 
 ##### Basic
 ```
-from dumbsql.qb import Q
+from wherebuilder.qb import Q
 
 where = Q('a.first_name = :first and a.age >= :age', first='eddy', age=34)
 print where.clause()
@@ -11,7 +11,7 @@ print where.clause()
 
 ##### AND or OR
 ```
-from dumbsql.qb import Q, AND, OR
+from wherebuilder.qb import Q, AND, OR
 
 where = OR(
     Q('a.first_name = :first and a.last_name = :last', first='eddy', last='lee'),
@@ -22,7 +22,7 @@ print where.clause()
 
 ##### IF or SWITCH
 ```
-from dumbsql.qb import Q, AND, OR, SWITCH, IF
+from wherebuilder.qb import Q, AND, OR, SWITCH, IF
 
 case = 'case2'
 where = SWITCH(case,
@@ -43,7 +43,7 @@ print where.clause()
 
 ##### More Complex
 ```
-from dumbsql.qb import Q, AND, OR, SWITCH, IF
+from wherebuilder.qb import Q, AND, OR, SWITCH, IF
 
 where = OR(
     Q('a.first_name = :first and a.last_name = :last', first='eddy', last='lee'),
