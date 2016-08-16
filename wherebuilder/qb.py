@@ -99,8 +99,8 @@ class SWITCH(object):
         for (case, q) in args:
             cases_map[case] = q
 
-        q = cases_map[switch]
-        self.translated_stmt = _conditional_clause(q)
+        q = cases_map.get(switch)
+        self.translated_stmt = _conditional_clause(q) if q else ''
 
     def clause(self):
         return self.translated_stmt
