@@ -22,7 +22,9 @@ class Q(object):
         return query_stmt
 
     def _value_by_type(self, val):
-        if type(val) in (basestring, str, unicode):
+        if val is None:
+            val = 'null'
+        elif type(val) in (basestring, str, unicode):
             val = '\'%s\'' % val
         elif type(val) in (int, long):
             val = '%d' % val
