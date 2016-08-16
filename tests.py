@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 try:
     import unittest2 as unittest
 except:
@@ -35,6 +36,11 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
         expected = "a.first_name = 'eddy' and a.age >= 34"
         self.assertEquals(q.clause(), expected)
 
+    def test_unicode_in_query(self):
+        q = qb.AND(qb.Q('a.first_name = :first', u'상원'), qb.Q('a.last_name = :last', u'이'))
+        expected = u"(a.first_name = '상원') and (a.last_name = '이')"
+        self.assertEquals(q.clause(), expected)
+
     def test_and_or_builder(self):
         where = qb.OR(
             qb.Q('a.first_name = :first and a.last_name = :last', first='eddy', last='lee'),
@@ -45,7 +51,7 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
 
     def test_and_or_with_emty_q(self):
         where = qb.OR(qb.IF(False, qb.Q('a.age <= 40')), qb.Q('a.age >= 34'))
-        expected = "(a.age >= 34)"
+        expected = '(a.age >= 34)'
         self.assertEquals(where.clause(), expected)
 
     def test_switch_builder(self):
@@ -54,8 +60,16 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
             ('case1', qb.AND(qb.Q('a.age >= 34'), qb.Q('a.age < :age', age=50))),
             ('case2', qb.AND(qb.Q('a.age >= 50'), qb.Q('a.age < :age', age=60)))
         )
-        expected = "(a.age >= 34) and (a.age < 50)"
+        expected = '(a.age >= 34) and (a.age < 50)'
         self.assertEquals(where.clause(), expected)
+
+    def test_switch_undefined_case(self):
+        var = 'case3'
+        where = qb.SWITCH(var,
+            ('case1', qb.AND(qb.Q('a.age >= 34'), qb.Q('a.age < :age', age=50))),
+            ('case2', qb.AND(qb.Q('a.age >= 50'), qb.Q('a.age < :age', age=60)))
+        )
+        self.assertEquals(where.clause(), '')
 
     def test_if_builder(self):
         var = 30

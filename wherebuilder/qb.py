@@ -68,7 +68,11 @@ class WhereNode(tree.TreeNode):
                     if pop.value.clause() != '':
                         operands.append(pop)
 
-                stmt = ' {} '.format(op).join(['({})'.format(o.value.clause()) for o in reversed(operands)])
+                reversed_operands = []
+                for o in reversed(operands):
+                    reversed_operands.append('(%s)' % o.value.clause())
+                    
+                stmt = (' %s ' % op).join(reversed_operands)
                 combined = WhereNode(Q(stmt))
                 combined.parent = self
                 stack.append(combined)
