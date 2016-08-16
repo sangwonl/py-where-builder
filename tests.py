@@ -43,6 +43,11 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
         expected = "(a.first_name = 'eddy' and a.last_name = 'lee') or ((a.age >= 34) and (a.allowed_push = 1))"
         self.assertEquals(where.clause(), expected)
 
+    def test_and_or_with_emty_q(self):
+        where = qb.OR(qb.IF(False, qb.Q('a.age <= 40')), qb.Q('a.age >= 34'))
+        expected = "(a.age >= 34)"
+        self.assertEquals(where.clause(), expected)
+
     def test_switch_builder(self):
         var = 'case1'
         where = qb.SWITCH(var,

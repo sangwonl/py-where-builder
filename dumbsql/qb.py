@@ -63,7 +63,8 @@ class WhereNode(tree.TreeNode):
                     if n.parent == s.parent:
                         break
                     pop = stack.pop()
-                    operands.append(pop)
+                    if pop.value.clause() != '':
+                        operands.append(pop)
 
                 stmt = ' {} '.format(op).join(['({})'.format(o.value.clause()) for o in reversed(operands)])
                 combined = WhereNode(Q(stmt))
