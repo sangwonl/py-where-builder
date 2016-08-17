@@ -41,6 +41,11 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
         expected = u"(a.first_name = '상원') and (a.last_name = '이')"
         self.assertEqual(q.clause(), expected)
 
+    def test_escaping_string_in_query(self):
+        q = qb.AND(qb.Q('a.first_name = :first', u"'상원'"), qb.Q('a.last_name = :last', u"'"))
+        expected = u"(a.first_name = '\\'상원\\'') and (a.last_name = '\\'')"
+        self.assertEqual(q.clause(), expected)
+
     def test_and_or_builder(self):
         where = qb.OR(
             qb.Q('a.first_name = :first and a.last_name = :last', first='eddy', last='lee'),
