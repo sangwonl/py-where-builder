@@ -9,6 +9,16 @@ else:
     from .py3 import *
 
 
+ESCAPE_REGEX = re.compile(r'[\0\n\r\032\'\"\\]')
+ESCAPE_MAP = {
+    '\0': '\\0', '\n': '\\n', '\r': '\\r', '\032': '\\Z',
+    '\'': '\\\'', '"': '\\"', '\\': '\\\\'
+}
+
+def escape_string(value, mapping=None):
+    return ('%s' % (ESCAPE_REGEX.sub(lambda match: ESCAPE_MAP.get(match.group(0)), value),))
+
+
 class Q(object):
     def __init__(self, query_stmt, *args, **kwargs):
         self.translated_stmt = self._format(query_stmt, *args, **kwargs) 
@@ -32,7 +42,7 @@ class Q(object):
         if val is None:
             val = 'null'
         elif isinstance(val, STRING_TYPE):
-            val = '\'%s\'' % val
+            val = '\'%s\'' % escape_string(val)
         elif isinstance(val, NUMBER_TYPE):
             val = '%d' % val
         elif isinstance(val, float):
