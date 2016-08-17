@@ -39,12 +39,17 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
     def test_similar_query_parameter(self):
         q = qb.AND(qb.Q('a.first_name = :first and a.last_name = :first2', first='eddy', first2='lee'))
         expected = u"(a.first_name = 'eddy' and a.last_name = 'lee')"
-        self.assertEquals(q.clause(), expected)
+        self.assertEqual(q.clause(), expected)
 
     def test_similar_query_parameter_and_value(self):
         q = qb.AND(qb.Q('a.first_name = :first and a.last_name = :first2', first='eddy', first2=':first'))
         expected = u"(a.first_name = 'eddy' and a.last_name = ':first')"
-        self.assertEquals(q.clause(), expected)
+        self.assertEqual(q.clause(), expected)
+
+    def test_q_with_non_quote(self):
+        q = qb.Q("name like '%$name%' and regdate > adddate('$base_dt 01:00:00', interval 1 day)", name='lee', base_dt='2016-08-17')
+        expected = "name like '%lee%' and regdate > adddate('2016-08-17 01:00:00', interval 1 day)"
+        self.assertEqual(q.clause(), expected)
 
     def test_unicode_in_query(self):
         q = qb.AND(qb.Q('a.first_name = :first', u'상원'), qb.Q('a.last_name = :last', u'이'))

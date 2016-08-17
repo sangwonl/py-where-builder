@@ -28,9 +28,9 @@ class Q(object):
         return self.translated_stmt
 
     def _format(self, query_stmt, *args, **kwargs):
-        matches = re.findall(r':[_a-zA-Z\d]+', query_stmt)
+        matches = re.findall(r'[:|\$][_a-zA-Z]+[\d]*', query_stmt)
         if kwargs:
-            if not all([(':%s' % k) in matches for k in kwargs]):
+            if not all([m[1:] in kwargs.keys() for m in matches]):
                 raise ValueError
 
             matches = sorted(matches, key=functools.cmp_to_key(lambda x, y: len(y) - len(x)))
@@ -41,11 +41,14 @@ class Q(object):
             query_stmt = self._format_with_args(query_stmt, matches, *args)
         return query_stmt
 
-    def _value_by_type(self, val):
+    def _value_by_type(self, prefix, val):
         if val is None:
             val = 'null'
         elif isinstance(val, STRING_TYPE):
-            val = '\'%s\'' % escape_string(val)
+            if prefix == '$':
+                val = '%s' % escape_string(val)
+            elif prefix == ':':
+                val = '\'%s\'' % escape_string(val)
         elif isinstance(val, NUMBER_TYPE):
             val = '%d' % val
         elif isinstance(val, float):
@@ -56,17 +59,16 @@ class Q(object):
 
     def _format_with_args(self, query_stmt, matches, *args):
         for i in range(len(matches)):
-            query_stmt = query_stmt.replace(matches[i], self._value_by_type(args[i])) 
+            m = matches[i]; prefix = m[0]
+            query_stmt = query_stmt.replace(m, self._value_by_type(prefix, args[i]))
         return query_stmt
 
     def _format_with_kwargs(self, query_stmt, matches, **kwargs):
         for m in matches:
-            query_stmt = query_stmt.replace(m, '{' + m[1:] + '}')
-
-        for key in kwargs:
-            kwargs[key] = self._value_by_type(kwargs[key])
-        query_stmt = query_stmt.format(**kwargs)
-        return query_stmt
+            prefix, field = m[0], m[1:]
+            query_stmt = query_stmt.replace(m, '{%s}' % m[1:])
+            kwargs[field] = self._value_by_type(prefix, kwargs[field])
+        return query_stmt.format(**kwargs)
 
 
 class WhereNode(tree.TreeNode):
