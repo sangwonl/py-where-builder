@@ -1,5 +1,12 @@
-import tree
 import re
+import sys
+
+from . import tree
+
+if sys.version_info.major == 2:
+    from .py2 import *
+else:
+    from .py3 import *
 
 
 class Q(object):
@@ -24,11 +31,11 @@ class Q(object):
     def _value_by_type(self, val):
         if val is None:
             val = 'null'
-        elif type(val) in (basestring, str, unicode):
+        elif isinstance(val, STRING_TYPE):
             val = '\'%s\'' % val
-        elif type(val) in (int, long):
+        elif isinstance(val, NUMBER_TYPE):
             val = '%d' % val
-        elif type(val) in (float):
+        elif isinstance(val, float):
             val = '%f' % val
         else:
             raise ValueError
