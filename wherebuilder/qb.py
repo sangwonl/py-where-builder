@@ -31,6 +31,8 @@ class Q(object):
         if kwargs:
             if not all([(':%s' % k) in matches for k in kwargs]):
                 raise ValueError
+
+            matches = sorted(matches, cmp=lambda x, y: len(y) - len(x))
             query_stmt = self._format_with_kwargs(query_stmt, matches, **kwargs)
         elif args:
             if len(args) != len(matches):
@@ -58,7 +60,11 @@ class Q(object):
 
     def _format_with_kwargs(self, query_stmt, matches, **kwargs):
         for m in matches:
-            query_stmt = query_stmt.replace(m, self._value_by_type(kwargs.get(m[1:], '')))
+            query_stmt = query_stmt.replace(m, '{' + m[1:] + '}')
+
+        for key in kwargs:
+            kwargs[key] = self._value_by_type(kwargs[key])
+        query_stmt = query_stmt.format(**kwargs)
         return query_stmt
 
 
