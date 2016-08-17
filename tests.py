@@ -51,6 +51,11 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
         expected = "name like '%lee%' and regdate > adddate('2016-08-17 01:00:00', interval 1 day)"
         self.assertEqual(q.clause(), expected)
 
+    def test_q_with_non_quote_with_unicode(self):
+        q = qb.Q("name like '%$name%' and regdate > adddate('$base_dt 01:00:00', interval 1 day)", name=u'이', base_dt='2016-08-17')
+        expected = u"name like '%이%' and regdate > adddate('2016-08-17 01:00:00', interval 1 day)"
+        self.assertEqual(q.clause(), expected)
+
     def test_unicode_in_query(self):
         q = qb.AND(qb.Q('a.first_name = :first', u'상원'), qb.Q('a.last_name = :last', u'이'))
         expected = u"(a.first_name = '상원') and (a.last_name = '이')"

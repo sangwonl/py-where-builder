@@ -17,11 +17,12 @@ ESCAPE_MAP = {
 }
 
 def escape_string(value, mapping=None):
-    return ('%s' % (ESCAPE_REGEX.sub(lambda match: ESCAPE_MAP.get(match.group(0)), value),))
+    return '%s' % ESCAPE_REGEX.sub(lambda match: ESCAPE_MAP.get(match.group(0)), value)
 
 
 class Q(object):
     def __init__(self, query_stmt, *args, **kwargs):
+        query_stmt = u'%s' % query_stmt
         self.translated_stmt = self._format(query_stmt, *args, **kwargs) 
 
     def clause(self):
