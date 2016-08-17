@@ -9,18 +9,6 @@ else:
     from .py3 import *
 
 
-def sort_by_length(x, y):
-    len_x = len(x)
-    len_y = len(y)
-
-    if len_x == len_y:
-        return 0
-    elif len_x > len_y:
-        return -1
-    elif len_x < len_y:
-        return 1
-
-
 class Q(object):
     def __init__(self, query_stmt, *args, **kwargs):
         self.translated_stmt = self._format(query_stmt, *args, **kwargs) 
@@ -34,7 +22,7 @@ class Q(object):
             if not all([(':%s' % k) in matches for k in kwargs]):
                 raise ValueError
 
-            matches = sorted(matches, cmp=sort_by_length)
+            matches = sorted(matches, cmp=lambda x, y: len(y) - len(x))
             query_stmt = self._format_with_kwargs(query_stmt, matches, **kwargs)
         elif args:
             if len(args) != len(matches):
