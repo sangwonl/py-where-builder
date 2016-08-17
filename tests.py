@@ -41,6 +41,11 @@ class DumbQueryBuilderTestCase(unittest.TestCase):
         expected = u"(a.first_name = 'eddy' and a.last_name = 'lee')"
         self.assertEquals(q.clause(), expected)
 
+    def test_similar_query_parameter_and_value(self):
+        q = qb.AND(qb.Q('a.first_name = :first and a.last_name = :first2', first='eddy', first2=':first'))
+        expected = u"(a.first_name = 'eddy' and a.last_name = ':first')"
+        self.assertEquals(q.clause(), expected)
+
     def test_unicode_in_query(self):
         q = qb.AND(qb.Q('a.first_name = :first', u'상원'), qb.Q('a.last_name = :last', u'이'))
         expected = u"(a.first_name = '상원') and (a.last_name = '이')"
